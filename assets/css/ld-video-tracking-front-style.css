@@ -1,0 +1,34 @@
+
+.three-inline-buttons .button {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.three-inline-buttons {
+     display: table;
+     margin: 0 auto;
+}
+
+.pay-control {
+  border: none;
+  font-size: 28px;
+  background: none;
+  color: #27AE60;
+}
+
+.pay-control-size {
+    border: none;
+    font-size: 14px;
+    background: none;
+    color: #27AE60;
+  }
+
+@media only screen and (max-width: 960px) {
+
+    .three-inline-buttons .button{
+        width: 50%;
+        margin: 0px;
+        text-align: center;
+    }
+    
+}

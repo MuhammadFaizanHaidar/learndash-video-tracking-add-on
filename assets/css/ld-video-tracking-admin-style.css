@@ -1,0 +1,99 @@
+#course_course_level {
+    display: none;
+}
+.ld-video-tracking-stats_wrapper > p:nth-child( odd ) {
+    background-color: #e5e5e5;
+}
+.ld-video-tracking-stats_wrapper > p:nth-child( even ) {
+    background-color: #e8e8e8;
+}
+.ld-video-tracking-sd-grades .ld-video-tracking-table .ld-video-tracking-progress {
+    display: block;
+    margin: 0; }
+    .ld-video-tracking-sd-grades .ld-video-tracking-table .ld-video-tracking-progress .ld-video-tracking-progress-bar {
+      top: 0;
+      height: 1.4em; }
+    .ld-video-tracking-sd-grades .ld-video-tracking-table .ld-video-tracking-progress .progress__indicator {
+      font-size: 1em;
+      position: relative;
+      right: 0.4em;
+      top: 0.2em;
+      z-index: 1; }
+  .ld-video-tracking-table {
+    border: 1px solid #efefef;
+    width: 100%; }
+    .ld-video-tracking-table thead th, .ld-video-tracking-table thead td {
+      font-weight: 700; }
+    .ld-video-tracking-table tbody tr:nth-child(odd) td, .ld-video-tracking-table tbody tr:nth-child(odd) th {
+      background: #f9f9f9; }
+    .ld-video-tracking-table tbody tr:last-child {
+      border-bottom-width: 0; }
+    .ld-video-tracking-table tfoot tr {
+      background: #f9f9f9; }
+      .ld-video-tracking-table tfoot tr .ld-video-tracking-pagination .page-numbers {
+        margin: 0; }
+      .ld-video-tracking-table tfoot tr .ld-video-tracking-table-sort {
+        text-align: right; }
+        .ld-video-tracking-table tfoot tr .ld-video-tracking-table-sort form, .ld-video-tracking-table tfoot tr .ld-video-tracking-table-sort select, .ld-video-tracking-table tfoot tr .ld-video-tracking-table-sort input, .ld-video-tracking-table tfoot tr .ld-video-tracking-table-sort button {
+          margin: 0; }
+    .ld-video-tracking-table th {
+      font-weight: 700; }
+    .ld-video-tracking-table th, .ld-video-tracking-table td {
+      border-bottom: 1px solid #efefef;
+      padding: 8px 12px; }
+      .ld-video-tracking-table th:first-child, .ld-video-tracking-table td:first-child {
+        padding-left: 12px; }
+      .ld-video-tracking-table th:last-child, .ld-video-tracking-table td:last-child {
+        padding-right: 12px; }
+.stats_wrapper > p {
+    margin: 0;
+    padding: 15px;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 0 1px 1px #cfcfcf;
+    -moz-box-shadow: inset 0 0 1px 1px #cfcfcf;
+    box-shadow: inset 0 0 1px 1px #cfcfcf;
+}
+.ld-video-tracking_support {
+    color: #fff;
+    text-decoration: none;
+    padding: 7px;
+    background-color: #0073aa;
+    line-height: 4;
+    border-radius: 4px;
+}
+.ld-video-tracking_support:hover,
+.ld-video-tracking_support:focus,
+.ld-video-tracking_support:active {
+    color: #fff;
+    background-color: #0073aa;
+}
+.ld-video-tracking_no_thanks {
+    color: #222;
+    text-decoration: none;
+    background-color: #e5e5e5;
+    border-radius: 4px;
+    outline: none;
+    padding: 6px;
+    border: 1px solid #e9e9e9;
+    cursor: pointer;
+}
+.ld-video-tracking_no_thanks:hover,
+.ld-video-tracking_no_thanks:focus,
+.ld-video-tracking_no_thanks:active {
+    color: #222;
+    background-color: #e5e5e5;
+}
+.ld-video-tracking-dismiss-form {
+    width: auto;
+    display: inline;
+}
+.ld-video-tracking-dismiss-wrapper {
+    padding: 5px;
+}
+.ld-video-tracking-error {
+	padding: 5px;
+	border: 1px solid #a94442;
+	color:#a94442;
+	background: #f2dede;
+	border-radius: 5px;
+}
