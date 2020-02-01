@@ -7,19 +7,19 @@ if( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 
-class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
+class Lt_List_Table_Class extends WP_List_Table {
 	//define dataset for WP_List_Table => data
 
 	/** Class constructor */
 	public function __construct() {
 
 		parent::__construct( [
-			'singular' => __( 'Student', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
-			'plural'   => __( 'Students', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
+			'singular' => __( 'LT Student', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
+			'plural'   => __( 'LT Students', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
 			'ajax'     => false //does this table support ajax?
 		] );
-	}
 
+	}
 	
 	/**
 	 * Function to filter data based on order , order_by & searched items
@@ -34,7 +34,7 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 		$users_array = array();
 		$args        = array();
 		if( !empty( $search_term ) ) {
-			$searchcol = array(
+			$searchcol= array(
 				'ID',
 				'user_email',
 				'user_login',
@@ -47,7 +47,7 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 				'fields'         => 'all_with_meta', 
 				'orderby'        => $orderby , 
 				'order'          => $order , 
-				'search'         => sanitize_email( $_REQUEST["s"] ) ,
+				'search'         =>$_REQUEST["s"] ,
 				'search_columns' => $searchcol
 				);
 			} else {
@@ -83,27 +83,16 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 			
 			$users = get_users( $args );
 			
-			
 			if( count( $users ) > 0 ) {
 				foreach ( $users as $index => $user) {
-					$author_info = get_userdata( $user->ID );
-					$post_id     =  get_the_ID();
-					$key         = $post_id."_".$user->ID;
-					$user_video_data = get_user_meta( $user->ID, $key, true );
-					if ( $user_video_data ) {
-						//delete_user_meta( $user->ID, $key, $user_video_data );
-						$users_array[] = array(
-							"id"          => $user->ID,
-							"title"       => '<b><a href="' .get_author_posts_url( $user->ID ). '"> '. $author_info->display_name .'</a></b>' ,
-							"video_title" => $user_video_data['video_title'],
-							"video_length"=> gmdate( "i:s", $user_video_data['video_duration'] )."min:sec",
-							"w_progress"  => gmdate( "i:s", $user_video_data['progress_in_sec'] )."min:sec",
-							"w_percentage"=> $user_video_data['progress_in_percentage']."%",
-						);
-					}
+                    $author_info   = get_userdata( $user->ID );
+                    $users_array[] = array(
+                        "id"         => $user->ID,
+                        "title"      => '<b><a href="' .get_author_posts_url( $user->ID ). '"> '. $author_info->display_name .'</a></b>' ,
+                    );
 					# code...
-				}
-			}
+            }
+        }
 
 		return $users_array;
 	}
@@ -114,18 +103,13 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 		$order   = isset( $_GET['order'] ) ? trim( $_GET['order'] ) : "";
 
 		$search_term  = isset( $_POST['s'] ) ? trim( $_POST['s'] ) : "";
-		$search_term  = isset( $_GET['s'] ) ? trim( $_GET['s'] ) : "";
-		if( $search_term == "" ) {
-
-			$search_term  = isset( $_GET['s'] ) ? trim( $_GET['s'] ) : "";
-		}
 	
 		$datas        = $this->list_table_data_fun( $orderby, $order, $search_term );
 
 
-		$per_page     = 20;
+		$per_page     = 100;
 		$current_page = $this->get_pagenum();
-		$total_items  = count($datas);
+		$total_items  = count( $datas );
 
 		$this->set_pagination_args( array( "total_items"=> $total_items,
 			"per_page" => $per_page ) );
@@ -142,13 +126,10 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 	public function get_columns() {
 
 		$columns = array(
-			"cb"           => "<input type='checkbox'/>",
-			"id"           => "ID",
-			"title"        => "User Name",
-			"video_title"  => "Video Title",
-			"video_length" => "Video Duration",
-			"w_progress"   => "Progress",
-			"w_percentage" => "Percentage",		
+			"cb"         => "<input type='checkbox'/>",
+			"id"         => "ID",
+			"title"      => "User Name",
+			"action"     => "Action"		
 		);
 
 		return $columns;
@@ -165,56 +146,18 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 		);
 
 	}	
-	
-	/**
-	 * Generate the table navigation above or below the table
-	 *
-	 * @since 3.1.0
-	 * @access protected
-	 *
-	 * @param string $which
-	 */
-	protected function display_tablenav( $which ) {
-
-		// REMOVED NONCE -- INTERFERING WITH SAVING POSTS ON METABOXES
-		// Add better detection if this class is used on meta box or not.
-		/*
-		if ( 'top' == $which ) {
-			wp_nonce_field( 'bulk-' . $this->_args['plural'] );
-		}
-		*/
-
-		?>
-		<div class="tablenav <?php echo esc_attr( $which ); ?>">
-
-			<div class="alignleft actions bulkactions">
-				<?php $this->bulk_actions( $which ); ?>
-			</div>
-			<?php
-			$this->extra_tablenav( $which );
-			$this->pagination( $which );
-			?>
-
-			<br class="clear"/>
-		</div>
-	<?php
-	}
 
 	//column_default
 	public function column_default( $item, $column_name ){
 		switch ( $column_name ) {
 			case 'id':
-	
+
+				
 			case 'title':
-
-			case 'video_title':
-
-			case 'video_length':
-					
-			case 'w_progress':
-
-			case 'w_percentage':
+				
 			return $item[ $column_name ];
+			case 'action':	
+				return '<a href="?page='.$_GET['page'].'&action=ld-vid-track-edit&user_id='.$item['id'].'">View Details</a>';
 			
 			default:
 				return "no value";
@@ -223,6 +166,12 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 
 	}
 
+	public function column_title( $item ) {
+		$action = array(
+				"edit" => sprintf('<a href="?page=%s&action=%s&user_id=%s">View Details</a>',$_GET['page'],'ld-vid-track-edit',$item['id']));
+		return sprintf('%1$s %2$s', $item['title'],$this->row_actions( $action ) );
+
+	}
 }
 
 /**
@@ -230,20 +179,19 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
  *
  * @return void
  */
-function ld_video_tracking_list_table_layout() {
-	$myRequestTable = new LD_Video_Tracking_List_Table_Class();
-	global $pagenow;
+function lt_vid_list_table_layout() {
+	$myRequestTable = new Lt_List_Table_Class();
 	?>
-	<div class="wrap"><h2>Video Progression Data...</h2>
-	<form method="get">
-	<input type="hidden" name="page" value="<?php echo $pagenow ?>" />
+	<div class="wrap"><h2>Users</h2>
+	<form method="post">
+	<input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
 	<?php if( isset( $myRequestTable ) ) : ?>
 		<?php $myRequestTable->prepare_items();  ?>
-		<?php $myRequestTable->search_box( __( 'Search Students By ID' ), 'students' ); //Needs To be called after $myRequestTable->prepare_items() ?>
+		<?php $myRequestTable->search_box( __( 'Search Users' ), 'students' ); //Needs To be called after $myRequestTable->prepare_items() ?>
 		<?php $myRequestTable->display(); ?>
 	<?php endif; ?>
 	</form> <?php
 
 }
 
-ld_video_tracking_list_table_layout();
+lt_vid_list_table_layout();

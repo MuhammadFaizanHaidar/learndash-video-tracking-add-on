@@ -5,13 +5,13 @@
 if( ! class_exists( 'WP_List_Table' ) ) {
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
-class LD_Course_Video_Tracking_List_Table_Class extends WP_List_Table {
+class LD_Detailed_Video_Tracking_List_Table_Class extends WP_List_Table {
     //define dataset for WP_List_Table => data
     /** Class constructor */
     public function __construct() {
         parent::__construct( [
-            'singular' => __( 'Course Student', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
-            'plural'   => __( 'Course Students', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
+            'singular' => __( 'Detailed Student Data', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
+            'plural'   => __( 'Detailed Students Datas', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
             'ajax'     => false //does this table support ajax?
         ] );
     }
@@ -47,91 +47,81 @@ class LD_Course_Video_Tracking_List_Table_Class extends WP_List_Table {
                 );
             $users   = get_users( $args );
             $users   = $users->ID;
+        } else {
+                if( $order == "asc" && $orderby == "id" ) {
+                    $args = array(
+                        'orderby'=> 'ID',
+                        'order'  => 'ASC',
+                        'fields' =>	'ID',
+                    ); 
+            } elseif ( $order == "desc" && $orderby == "id"  ) {
+                    $args = array(
+                        'orderby'=> 'ID',
+                        'order'  => 'DESC',
+                        'fields' =>	'ID',
+                    );
+                
+            } elseif ( $order == "desc" && $orderby == "title"  ) {
+                    $args = array(
+                        'orderby'   => 'name',
+                        'order'     => 'DESC',
+                        'fields'	=>	'ID',
+                    );
+            } elseif ( $order == "asc" && $orderby == "title"  ) {
+                $args = array(
+                    'orderby'   => 'name',
+                    'order'     => 'ASC',
+                    'fields'	=>	'ID',
+                );
             } else {
-                    if( $order == "asc" && $orderby == "id" ) {
-                        $args = array(
-                            'orderby'      => 'ID',
-                            'order'        => 'ASC',
-                            'fields'		=>	'ID',
-                        ); 
-                } elseif ( $order == "desc" && $orderby == "id"  ) {
-                        $args = array(
-                            'orderby'      => 'ID',
-                            'order'        => 'DESC',
-                            'fields'		=>	'ID',
-                        );
-                    
-                } elseif ( $order == "desc" && $orderby == "title"  ) {
-                        $args = array(
-                            'orderby'      => 'name',
-                            'order'        => 'DESC',
-                            'fields'		=>	'ID',
-                        );
-                } elseif ( $order == "asc" && $orderby == "title"  ) {
-                    $args = array(
-                        'orderby'      => 'name',
-                        'order'        => 'ASC',
-                        'fields'		=>	'ID',
-                    );
-                } else {
-                    $args = array(
-                        'orderby'      => 'ID',
-                        'order'        => 'DESC',
-                        'fields'		=>	'ID',
-                    );
-                }
+                $args = array(
+                    'orderby'   => 'ID',
+                    'order'     => 'DESC',
+                    'fields'	=>	'ID',
+                );
             }
-            
-			$course_id  = learndash_get_course_id( intval( $_GET['post'] ) );
-            if ( empty( $users ) ) {
-				$course_users_query = ld_vid_tracking_get_users_for_course( $course_id, $args, false );
-				if ( $course_users_query instanceof WP_User_Query ) {
-					$users  = $course_users_query->get_results();
-				}
-			}
-            
+        }
+        $user_id = isset( $_GET['user_id'] ) ? intval( $_GET['user_id'] ) : "";
+        echo $user_id;
+        $courses     = learndash_user_get_enrolled_courses( $user_id );
+        $author_info = get_userdata( $user_id );
+        print_r( $courses );
+        $courses     = learndash_user_get_enrolled_courses( $user_id );
+        $author_info = get_userdata( $user_id );
+        foreach( $courses as $course_id ) {
             $course_lesson_ids  = learndash_course_get_steps_by_type( $course_id, 'sfwd-lessons' );
             $course_topic_ids   = learndash_course_get_steps_by_type( $course_id, 'sfwd-topic' );
             $course_progression = array_merge( $course_lesson_ids, $course_topic_ids );
             $course_duration    = 0;
             $course_progress    = 0;
-
             foreach( $course_progression as $post_id ) {
                 $key             = "ld-course-video-duration".$post_id;
                 $video_data      = get_post_meta( $course_id, $key, true );
                 if( $video_data ) {
                     $course_duration = $course_duration + $video_data["video_duration"];
                 }
-            }
-   
-            if( count( $users ) > 0 ) {
-                foreach ( $users as $index => $user) {
-                    $course_progress = 0;
-                    $author_info = $user = get_userdata( $user );
-                    foreach( $course_progression as $post_id ) {
-                        
-                        $key             = $post_id."_".$user->ID;
-                        $key             = "ld-video-tracking".$key;
-                        $video_data      = get_post_meta( $course_id, $key, true );
-                        if( $video_data ) {
-                            $course_progress = $course_progress + $video_data['progress_in_sec'];
-                        }
-                    }
-                    if ( $course_duration > 0 &&  $course_progress > 0 ) {
-                        //delete_user_meta( $user->ID, $key, $user_video_data );
-                        $percent_progress = ( $course_progress/$course_duration ) * 100;
-                        $users_array[] = array(
-                            "id"              => $user->ID,
-                            "title"           => '<b><a href="' .get_author_posts_url( $user->ID ). '"> '. $author_info->display_name .'</a></b>' ,
-                            "course_title"    => get_the_title( $course_id ),
-                            "course_duration" => gmdate( "i:s", $course_duration )."min:sec",
-                            "w_progress"      => gmdate( "i:s", $course_progress )."min:sec",
-                            "w_percentage"    => ( int )$percent_progress."%",
-                        );
-                    }
-                    # code...
+                $key             = $post_id."_".$user_id;
+                $key             = "ld-video-tracking".$key;
+                $video_data      = get_post_meta( $course_id, $key, true );
+                if( $video_data ) {
+                    $course_progress = $course_progress + $video_data['progress_in_sec'];
                 }
             }
+
+            if ( $course_duration > 0 &&  $course_progress > 0 ) {
+                //delete_user_meta( $user->ID, $key, $user_video_data );
+                $percent_progress = ( $course_progress/$course_duration ) * 100;
+                $users_array[] = array(
+                    "id"              => $user_id,
+                    "title"           => '<b><a href="' .get_author_posts_url( $user_id ). '"> '. $author_info->display_name .'</a></b>' ,
+                    "course_title"    => get_the_title( $course_id ),
+                    "course_duration" => gmdate( "i:s", $course_duration )."min:sec",
+                    "w_progress"      => gmdate( "i:s", $course_progress )."min:sec",
+                    "w_percentage"    => ( int )$percent_progress."%",
+                );
+            }
+                
+        }
 
         return $users_array;
     }
@@ -234,18 +224,17 @@ class LD_Course_Video_Tracking_List_Table_Class extends WP_List_Table {
  *
  * @return void
  */
-function ld_course_video_tracking_list_table_layout() {
-    $myRequestTable = new LD_Course_Video_Tracking_List_Table_Class();
+function ld_detailed_video_tracking_list_table_layout() {
+    $myRequestTable = new LD_Detailed_Video_Tracking_List_Table_Class();
     global $pagenow;
     ?>
-    <div class="wrap"><h2>Video Progression Data</h2>
+    <div class="wrap"><h2>User Video Tracking Details</h2>
     <form method="get">
     <input type="hidden" name="page" value="<?php echo $pagenow ?>" />
     <?php if( isset( $myRequestTable ) ) : ?>
         <?php $myRequestTable->prepare_items();  ?>
-        <?php $myRequestTable->search_box( __( 'Search Students By ID' ), 'students' ); //Needs To be called after $myRequestTable->prepare_items() ?>
         <?php $myRequestTable->display(); ?>
     <?php endif; ?>
     </form> <?php
 }
-ld_course_video_tracking_list_table_layout();
+ld_detailed_video_tracking_list_table_layout();

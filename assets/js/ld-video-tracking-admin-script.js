@@ -10,8 +10,8 @@ jQuery(document).ready(function(){
                 
             }
         });
-        if ( pageURL == url ) {
-            jQuery(location).attr( 'href', pageURL );
-        }
-        return;
+        // if ( pageURL == url ) {
+        //     jQuery(location).attr( 'href', pageURL );
+        // }
+        //return;
 });

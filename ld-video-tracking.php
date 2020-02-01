@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: LearnDash Video Tracking Add-on
- * Plugin URI:  https://profiles.wordpress.org/muhammadfaizanhaidar/
+ * Plugin URI:  https://wootitans.com/
  * Description: This addon will provide video tracking for LearnDash courses, lessons & topics
  * Version:     1.0
- * Author:      Muhammad Faizan Haidar
- * Author URI:  https://profiles.wordpress.org/muhammadfaizanhaidar/
+ * Author:      WooTitans
+ * Author URI:  https://wootitans.com/
  * Text Domain: ld-video-tracking
  * License: 	GNU AGPL
  */
@@ -120,7 +120,13 @@ class LD_Video_Tracking {
 		
 		if( file_exists( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-functions.php' ) ) {
             require_once ( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-functions.php' );
-        }
+		}
+		
+		if ( file_exists( LD_VIDEO_TRACKING_INCLUDES_DIR . 'settings/options.php' ) ) {
+
+			require_once ( LD_VIDEO_TRACKING_INCLUDES_DIR . 'settings/options.php' );
+		}
+
 	}
 
 	private function hooks() {
@@ -128,6 +134,8 @@ class LD_Video_Tracking {
 		add_action( 'wp_enqueue_scripts',    [ $this, 'frontend_enqueue_scripts' ], 11 );
 		add_action( 'plugins_loaded',        [ $this, 'upgrade' ] );
 		add_filter( 'learndash_lesson_video_data',[ $this, 'ld_lesson_video_filter' ], 99, 2 );
+		//add_filter( 'ld_video_params',[ $this, 'ld_lesson_video_filter_content' ], 99, 5 );
+		add_filter( 'plugin_action_links_' . LD_VIDEO_TRACKING_BASE_DIR, [ $this, 'settings_link' ], 10, 1 );
 		add_action( 'wp_ajax_video_tracking_ajax_action',        array( $this, 'ld_video_tracking_ajax_action' ), 10 );
         add_action( 'wp_ajax_nopriv_video_tracking_ajax_action', array( $this, 'ld_video_tracking_ajax_action' ), 10);
 	}
@@ -212,6 +220,18 @@ class LD_Video_Tracking {
 		exit;
 	}
 
+	public function ld_lesson_video_filter_content( $controlls, $context, $video_content, $post, $settings ) {
+		echo "hello";
+		print_r( $video_content );
+		exit;
+		return $ld_video_params = apply_filters( 
+			'ld_video_paramss', 
+			array( 
+				'controls' => $controlls,
+			), 
+			'local', $video_content, $post, $settings 
+		);
+	}
 
 	/**
 	 * Overrides LearnDash Lesson Video Filter
@@ -260,6 +280,7 @@ class LD_Video_Tracking {
 				$p_course  = $post_meta['sfwd-topic_course'];
 			}
 
+			
 			$video_data["parent_course"]  = $p_course;
 			wp_localize_script( 'ld-video-tracking-script', 
 				'ld_video_tracking_video_data', 
@@ -339,6 +360,17 @@ class LD_Video_Tracking {
 			null 
 		);
 		
+	}
+
+	/**
+	 * Add settings link on plugin page
+	 *
+	 * @return void
+	 */
+	public function settings_link( $links ) {
+		$settings_link = '<a href="admin.php?page=woo-titans-ld-vid-tracking-options">' . __( 'Settings', LD_VIDEO_TRACKING_TEXT_DOMAIN ) . '</a>';
+		array_unshift( $links, $settings_link );
+		return $links;
 	}
 
 	/**

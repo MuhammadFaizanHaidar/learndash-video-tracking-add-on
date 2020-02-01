@@ -5,35 +5,30 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+ld_list_table();
+/**
+ * Fires based on the actions by the list table
+ *
+ * @return void
+ */
+function ld_list_table() {
+	$action = isset( $_GET['action'] ) ? trim( $_GET['action'] ) : "";
 
-$llmsat_options = get_option( 'llmsat_options', array() );
+	if( $action == "ld-vid-track-edit" ) {
+		$user_id = isset( $_GET['user_id'] ) ? intval( $_GET['user_id'] ) : "";
+		if( file_exists( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-user-details.php' ) ) {
+			require_once ( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-user-details.php' );
+		}
+	} else {
+		ob_start();
+		if( file_exists( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-users-views.php' ) ) {
+			require_once ( LD_VIDEO_TRACKING_INCLUDES_DIR . 'ld-video-tracking-users-views.php' );
+		}
+	
 
-$delete_attendance = !empty( $llmsat_options['llmsat_delete_attendance']) ? $llmsat_options['llmsat_delete_attendance'] : 'no';
-?>
-<div id="llmsat-general-options">
-	<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST">
-		<input type="hidden" name="action" value="llmsat_admin_settings">
-		<?php wp_nonce_field( 'llmsat_admin_settings_action', 'llmsat_admin_settings_field' ); ?>
-		<table class="form-table">
-			<tbody>
-				<tr valign="top">
-					<th scope="row">
-						<label for="llmsat_delete_attendance">
-							<?php _e( 'Delete Attendance On Uninstall  ', LLMS_At_TEXT_DOMAIN ); ?>
-						</label>
-					</th>
-					<td>
-						<input type="checkbox" name="llmsat_delete_attendance" id="llmsat_delete_attendance"<?php if( $delete_attendance == 'on' ) { ?>checked="checked"<?php } ?> />
-						<p class="description"><?php _e( 'If enabled it will delete all courses & users attendance data', LLMS_At_TEXT_DOMAIN); ?></p>
-					</td>
-				</tr>
-				<?php do_action( 'lifterlms_attendance_settings', $llmsat_options ); ?>
-			</tbody>
-		</table>
-		<p>
-			<?php
-			submit_button( __( 'Save Settings', LLMS_At_TEXT_DOMAIN ), 'primary', 'llmsat_settings_submit' );
-			?>
-		</p>
-	</form>
-</div>
+		$template = ob_get_contents();
+
+		ob_end_clean();
+		echo $template;
+	}
+}

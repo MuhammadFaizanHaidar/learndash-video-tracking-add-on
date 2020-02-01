@@ -1,14 +1,28 @@
-if ( ld_video_tracking_video_data.videos_found_provider == 'vimeo' ) {
+
+if ( ld_video_tracking_video_data.videos_found_provider == 'vimeo' || ld_video_tracking_video_data.videos_found_provider == 'vimeo.com' || ld_video_tracking_video_data.videos_found_provider == 'www.vimeo.com' ) {
     var post_id       = ld_video_tracking_video_data.post_id;
     var user_ID       = ld_video_tracking_video_data.user_id;
     var post_type     = ld_video_tracking_video_data.post_type;
     var parent_course =  ld_video_tracking_video_data.parent_course;
     var video_title   = "";
     var pre_progress  = 0;
+   
+   
+    
     jQuery( document ).ready( function() {
+        // var ld_video_players = new Vimeo.Player('https://vimeo.com/381126025');
+        // player = ld_video_players;
+        // player.getVideoTitle().then(function(title) {
+        //     console.log('title:', title);
+        //     video_title = title;
+        // });
         //console.log('ld_video_tracking_video_data[%o]', ld_video_tracking_video_data.videos_found_provider);
-        jQuery('.ld-video iframe').each( function(index, element) {
+        var ld_video_count   = 0;
+        var player;
+        var ld_video_players = Array;
+        jQuery('.ld-tab-content iframe').each( function(index, element) {
             ld_video_count += 1;
+            
             var element_id = jQuery(element).prop('id');
             if ( ( typeof element_id === 'undefined' ) || ( element_id == '' ) ) {
                 jQuery(element).prop('id', 'ld-video-player-'+ld_video_count);
