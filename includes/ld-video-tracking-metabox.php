@@ -159,7 +159,6 @@ class LD_Video_Tracking_Metabox {
     public function show_course_students_video_url_meta_box() {
         $post_id   = absint( sanitize_text_field( $_REQUEST['post'] ) );
         $video_url = get_post_meta( $post_id, 'ld_video_tracking_url', true );
-        
         ?>
         <div>
             <input type="text" style="width:100%;" name="ld-video-tracking-url" value="<?php echo $video_url?>" >

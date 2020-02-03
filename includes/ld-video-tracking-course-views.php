@@ -90,7 +90,7 @@ class LD_Course_Video_Tracking_List_Table_Class extends WP_List_Table {
 					$users  = $course_users_query->get_results();
 				}
 			}
-            //print_r( $users);
+            
             $course_lesson_ids  = learndash_course_get_steps_by_type( $course_id, 'sfwd-lessons' );
             $course_topic_ids   = learndash_course_get_steps_by_type( $course_id, 'sfwd-topic' );
             $course_progression = array_merge( $course_lesson_ids, $course_topic_ids );

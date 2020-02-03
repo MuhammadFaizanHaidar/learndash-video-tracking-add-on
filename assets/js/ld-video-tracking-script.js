@@ -7,6 +7,11 @@ if ( ld_video_tracking_video_data.videos_found_provider == 'vimeo' || ld_video_t
     var video_title   = "";
     var pre_progress  = 0;
    
+<<<<<<< HEAD
+=======
+   
+    
+>>>>>>> 280e9b4b7f89f3a1888aaebf9776c08b14f85ba7
     jQuery( document ).ready( function() {
         // var ld_video_players = new Vimeo.Player('https://vimeo.com/381126025');
         // player = ld_video_players;
