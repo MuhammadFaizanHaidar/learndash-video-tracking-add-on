@@ -7,15 +7,15 @@ if( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 
-class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
+class LD_Video_Tracking_Lessons_List_Table_Class extends WP_List_Table {
 	//define dataset for WP_List_Table => data
 
 	/** Class constructor */
 	public function __construct() {
 
 		parent::__construct( [
-			'singular' => __( 'Lesson Student', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
-			'plural'   => __( 'Lesson Students', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
+			'singular' => __( 'LT Lesson', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //singular name of the listed records
+			'plural'   => __( 'LT Lessons', LD_VIDEO_TRACKING_TEXT_DOMAIN ), //plural name of the listed records
 			'ajax'     => false //does this table support ajax?
 		] );
 	}
@@ -81,20 +81,22 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 			
 			}
 			
-			$users = get_users( $args );
-			
-			
-			if( count( $users ) > 0 ) {
-				foreach ( $users as $index => $user) {
-					$author_info = get_userdata( $user->ID );
-					$post_id     =  get_the_ID();
-					$key         = $post_id."_".$user->ID;
-					$user_video_data = get_user_meta( $user->ID, $key, true );
+            $course_id = intval ( $_GET['course_id'] );
+			$user_id   = intval( $_GET['user_id'] );
+			$author_info   = get_userdata( $user_id );
+			$course_lesson_ids  = learndash_course_get_steps_by_type( $course_id, 'sfwd-lessons' );
+			if( count( $course_lesson_ids ) > 0 ) {
+				foreach ($course_lesson_ids as $lesson_id ) {
+					$author_info = get_userdata( $user_id );
+					$post_id     = $lesson_id;
+					$key         = $post_id."_".$user_id;
+					$user_video_data = get_user_meta( $user_id, $key, true );
 					if ( $user_video_data ) {
 						//delete_user_meta( $user->ID, $key, $user_video_data );
 						$users_array[] = array(
-							"id"          => $user->ID,
-							"title"       => '<b><a href="' .get_author_posts_url( $user->ID ). '"> '. $author_info->display_name .'</a></b>' ,
+							"id"          => $user_id,
+							"user_name"   => '<b><a href="' .get_author_posts_url( $user_id ). '"> '. $author_info->display_name .'</a></b>',
+							"title"       => '<b><a href="' .get_permalink( $lesson_id ). '"> '. get_the_title( $lesson_id ) .'</a></b>' ,
 							"video_title" => $user_video_data['video_title'],
 							"video_length"=> gmdate( "h:i:s", $user_video_data['video_duration'] )."hr:min:sec",
 							"w_progress"  => gmdate( "h:i:s", $user_video_data['progress_in_sec'] )."hr:min:sec",
@@ -143,8 +145,9 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 
 		$columns = array(
 			"cb"           => "<input type='checkbox'/>",
-			"id"           => "ID",
-			"title"        => "User Name",
+			"id"           => "User ID",
+			"user_name"    => "User Name",
+			"title"        => "Lesson Name",
 			"video_title"  => "Video Title",
 			"video_length" => "Video Duration",
 			"w_progress"   => "Progress",
@@ -160,7 +163,7 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 
 	public function get_sortable_columns() {
 			return array (
-			"title" => array( "title", true ),
+			"user_name" => array( "user_name", true ),
 			"id"    => array( "id", true ),
 		);
 
@@ -204,6 +207,8 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 	public function column_default( $item, $column_name ){
 		switch ( $column_name ) {
 			case 'id':
+			
+			case 'user_name':
 	
 			case 'title':
 
@@ -214,7 +219,7 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
 			case 'w_progress':
 
 			case 'w_percentage':
-			return $item[ $column_name ];
+				return $item[ $column_name ];
 			
 			default:
 				return "no value";
@@ -230,20 +235,19 @@ class LD_Video_Tracking_List_Table_Class extends WP_List_Table {
  *
  * @return void
  */
-function ld_video_tracking_list_table_layout() {
-	$myRequestTable = new LD_Video_Tracking_List_Table_Class();
+function ld_video_tracking_list_lessons_table_layout() {
+	$myRequestTable = new LD_Video_Tracking_Lessons_List_Table_Class();
 	global $pagenow;
 	?>
-	<div class="wrap"><h2>Video Progression Data...</h2>
+	<div class="wrap"><h2>Lessons Video Tracking Data...</h2>
 	<form method="get">
 	<input type="hidden" name="page" value="<?php echo $pagenow ?>" />
 	<?php if( isset( $myRequestTable ) ) : ?>
 		<?php $myRequestTable->prepare_items();  ?>
-		<?php $myRequestTable->search_box( __( 'Search Users' ), 'students' ); //Needs To be called after $myRequestTable->prepare_items() ?>
 		<?php $myRequestTable->display(); ?>
 	<?php endif; ?>
 	</form> <?php
 
 }
 
-ld_video_tracking_list_table_layout();
+ld_video_tracking_list_lessons_table_layout();

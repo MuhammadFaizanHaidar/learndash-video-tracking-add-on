@@ -31,7 +31,7 @@ class LD_Video_Tracking_Metabox {
     public function register_ld_video_tracking_meta_boxes() {
         add_meta_box( 
             'ld-video-tracking-students-metaboxes-id', 
-            'Students Video Tracking Information', 
+            'Students Video Tracking Informations', 
             array( $this, 'show_students_video_data_listing_meta_box' ), 
             'sfwd-lessons', 
             'advanced', 
@@ -40,7 +40,7 @@ class LD_Video_Tracking_Metabox {
 
         add_meta_box( 
             'ld-video-tracking-students-metaboxes-id', 
-            'Students Video Tracking Information', 
+            'Students Video Tracking Informations', 
             array( $this, 'show_students_video_data_listing_meta_box' ), 
             'sfwd-topic', 
             'advanced', 
@@ -49,9 +49,18 @@ class LD_Video_Tracking_Metabox {
 
         add_meta_box( 
             'ld-video-tracking-students-metaboxes-id', 
-            'Students Video Tracking Information', 
+            'Students Video Tracking Informations', 
             array( $this, 'show_course_students_video_data_listing_meta_box' ), 
             'sfwd-courses', 
+            'advanced', 
+            'high'
+        );
+
+        add_meta_box( 
+            'ld-video-tracking-url-metaboxes-id', 
+            'Students Video Tracking URL Informations', 
+            array( $this, 'show_course_students_video_url_meta_box' ), 
+            [ 'sfwd-lessons', 'sfwd-topic' ], 
             'advanced', 
             'high'
         );
@@ -74,15 +83,18 @@ class LD_Video_Tracking_Metabox {
             if( $post->post_type == 'sfwd-lessons' ) {
 				$post_meta = get_post_meta( $post_id, "_sfwd-lessons", true );
                 $p_course  = $post_meta['sfwd-lessons_course'];
-                $video_url = $post_meta['sfwd-lessons_lesson_video_url'];
+                $video_url = $_POST['ld-video-tracking-url'];
                 $video_enabled = $post_meta['sfwd-lessons_lesson_video_enabled'];
 			} elseif( $post->post_type == 'sfwd-topic' ) {
 				$post_meta = get_post_meta( $post_id, "_sfwd-topic", true );
                 $p_course  = $post_meta['sfwd-topic_course'];
-                $video_url = $post_meta['sfwd-topic_lesson_video_url'];
+                $video_url = $_POST['ld-video-tracking-url'];
                 $video_enabled = $post_meta['sfwd-topic_lesson_video_enabled'];
             }
-            if ( !empty( $p_course ) ) {
+            if ( !empty( $video_url ) ) {
+                update_post_meta( $post_id, 'ld_video_tracking_url', $video_url );
+            }
+            if ( !empty( $p_course ) && !empty( $video_url ) ) {
                 $video_data = [];
                 $video_data["post_id"]   = $post_id;
                 $video_data["video_url"] = $video_url;
@@ -91,7 +103,9 @@ class LD_Video_Tracking_Metabox {
                 } else {
                     $video_data["video_duration"] =  ""; 
                 }
+                //$vid_data = get_post_meta( $p_course, "ld-course-video-duration".$post_id, true );
                 update_post_meta( $p_course, "ld-course-video-duration".$post_id, $video_data );
+                
             }
         }
     }
@@ -141,6 +155,16 @@ class LD_Video_Tracking_Metabox {
         }
 
         do_action( 'ld_course_video_tracking_after_tracking_data_listing' ); 
+    }
+    public function show_course_students_video_url_meta_box() {
+        $post_id   = absint( sanitize_text_field( $_REQUEST['post'] ) );
+        $video_url = get_post_meta( $post_id, 'ld_video_tracking_url', true );
+        
+        ?>
+        <div>
+            <input type="text" style="width:100%;" name="ld-video-tracking-url" value="<?php echo $video_url?>" >
+        </div>
+        <?php 
     }
 }
 

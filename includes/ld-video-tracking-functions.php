@@ -17,6 +17,99 @@ function curl_get( $url ) {
 }
 
 /**
+ * Get Admin ids
+ *
+ * @return array
+ */
+function ld_vid_tracking_admin_user_ids() {
+    //Grab wp DB
+    global $wpdb;
+    //Get all users in the DB
+    $wp_user_search = $wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID");
+
+    //Blank array
+    $adminArray = array();
+    //Loop through all users
+    foreach ( $wp_user_search as $userid ) {
+        //Current user ID we are looping through
+        $curID = $userid->ID;
+        //Grab the user info of current ID
+        $curuser = get_userdata( $curID );
+        //Current user level
+        $user_level = $curuser->user_level;
+        //Only look for admins
+        if( $user_level >= 8 ) {//levels 8, 9 and 10 are admin
+            //Push user ID into array
+            $adminArray[] = $curID;
+        }
+    }
+
+    return $adminArray;
+}
+
+/**
+ * Get registered users for a given course
+ *
+ * @param [type] $course_id
+ * @param [type] $args
+ * @param boolean $ex_admin
+ * @return array
+ */
+function ld_vid_tracking_get_users_for_course( $course_id, $args = array(), $ex_admin = true ) {
+    $course_user_ids    = array();
+    if ( empty( $course_id ) ) return $course_user_ids;
+    $query_args         = "";
+    $query_args         = wp_parse_args( $query_args, $args );
+    
+	if ( $ex_admin == true ) {
+		$query_args['role__not_in'] = array('administrator');
+	}
+	
+	$course_price_type = learndash_get_course_meta_setting( $course_id, 'course_price_type' );
+    if ( $course_price_type == 'open' ) {
+		
+        $user_query = new WP_User_Query( $query_args );
+        
+		return $user_query;
+	} else { 
+        $course_access_list = learndash_get_course_meta_setting( $course_id, 'course_access_list');
+        $course_user_ids    = array_merge( $course_user_ids, $course_access_list );
+
+        $course_access_users = learndash_get_course_users_access_from_meta( $course_id );
+        $course_user_ids     = array_merge( $course_user_ids, $course_access_users );
+        
+        $course_groups_users = get_course_groups_users_access( $course_id );
+        $course_user_ids     = array_merge( $course_user_ids, $course_groups_users );
+        //print_r($course_user_ids );
+        if ( !empty( $course_user_ids ) )
+            $course_user_ids = array_unique( $course_user_ids );
+
+        $course_expired_access_users = learndash_get_course_expired_access_from_meta( $course_id );
+        if ( !empty( $course_expired_access_users ) )
+            $course_user_ids = array_diff( $course_access_list, $course_expired_access_users );
+
+        
+        if ( $ex_admin == false ) {
+            $admin_ids       = [];
+            $admin_ids       = ld_vid_tracking_admin_user_ids();
+            $course_user_ids = array_merge( $course_user_ids, $admin_ids );
+        }
+        if ( !empty( $course_user_ids ) ) {
+            $query_args['include'] = $course_user_ids;
+            
+            $user_query = new WP_User_Query( $query_args );
+            
+            $course_user_ids = $user_query->get_results();
+            
+            return $user_query;
+        }
+        
+    }
+
+    return $course_user_ids;
+}
+
+/**
  * Get Utube Video id from url
  *
  * @param [type] $url
@@ -103,3 +196,4 @@ function get_video_details( $url ) {
 
     }
 }
+
